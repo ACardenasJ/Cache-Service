@@ -14,6 +14,8 @@ import { SetCacheUseCase } from '../../application/use-cases/set-cache.use-case'
 import { GetCacheUseCase } from '../../application/use-cases/get-cache.use-case';
 import { SetDistributedCacheUseCase } from '../../application/use-cases/set-distributed-cache.use-case';
 import { CompareAndSetCacheUseCase } from '../../application/use-cases/compare-and-set-cache.use-case';
+import { DeleteCacheUseCase } from '../../application/use-cases/delete-cache.use-case';
+import { ListKeysUseCase } from '../../application/use-cases/list-keys.use-case';
 import { LoggerService } from '../services/logger.service';
 
 @Controller('cache')
@@ -23,12 +25,14 @@ export class CacheController {
     private readonly getCacheUseCase: GetCacheUseCase,
     private readonly setDistributedCacheUseCase: SetDistributedCacheUseCase,
     private readonly compareAndSetCacheUseCase: CompareAndSetCacheUseCase,
+    private readonly deleteCacheUseCase: DeleteCacheUseCase,
+    private readonly listKeysUseCase: ListKeysUseCase,
     private readonly logger: LoggerService,
   ) {}
 
   @Post(':key')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async setCache(
+  async set(
     @Param('key') key: string,
     @Body() body: { value: any; ttl?: number },
   ): Promise<void> {
@@ -37,9 +41,22 @@ export class CacheController {
   }
 
   @Get(':key')
-  async getCache(@Param('key') key: string): Promise<any> {
+  async get(@Param('key') key: string): Promise<any> {
     this.logger.log(`Getting cache for key: ${key}`, 'CacheController');
     return this.getCacheUseCase.execute(key);
+  }
+
+  @Delete(':key')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('key') key: string): Promise<void> {
+    this.logger.log(`Deleting cache for key: ${key}`, 'CacheController');
+    await this.deleteCacheUseCase.execute(key);
+  }
+
+  @Get()
+  async listKeys(@Query('pattern') pattern: string = '*'): Promise<string[]> {
+    this.logger.log(`Listing keys with pattern: ${pattern}`, 'CacheController');
+    return this.listKeysUseCase.execute(pattern);
   }
 
   @Post(':key/distributed')

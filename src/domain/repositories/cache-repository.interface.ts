@@ -12,6 +12,12 @@ export interface ICacheRepository {
    */
 
   /**
+   * Verifica la disponibilidad del servicio de caché.
+   * @returns true si el servicio está disponible, false en caso contrario
+   */
+  ping(): Promise<boolean>;
+
+  /**
    * Almacena un item en el caché.
    * @param item Item a almacenar con su clave, valor y TTL opcional
    */
@@ -34,6 +40,13 @@ export interface ICacheRepository {
    * Limpia todo el caché.
    */
   clear(): Promise<void>;
+
+  /**
+   * Obtiene las claves del caché que coinciden con un patrón.
+   * @param pattern Patrón de búsqueda para las claves
+   * @returns Lista de claves que coinciden con el patrón
+   */
+  getKeys(pattern: string): Promise<string[]>;
 
   /**
    * Operaciones distribuidas

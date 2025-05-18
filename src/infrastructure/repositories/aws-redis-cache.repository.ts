@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, Optional } from '@nestjs/common';
 import { ICacheRepository } from '../../domain/repositories/cache-repository.interface';
 import { CacheItem } from '../../domain/entities/cache-item.entity';
 import { DistributedCacheNode } from '../../domain/entities/distributed-cache-node.entity';
@@ -16,8 +16,9 @@ export class AWSRedisCacheRepository implements ICacheRepository {
   constructor(
     private readonly consensusService: ConsensusService,
     private readonly configService: ConfigService,
+    @Optional() @Inject(Redis) private readonly injectedRedis?: Redis,
   ) {
-    this.redis = new Redis({
+    this.redis = this.injectedRedis || new Redis({
       host: this.configService.get<string>('AWS_ELASTICACHE_ENDPOINT'),
       port: this.configService.get<number>('AWS_ELASTICACHE_PORT', 6379),
       password: this.configService.get<string>('AWS_ELASTICACHE_AUTH_TOKEN'),
@@ -32,13 +33,11 @@ export class AWSRedisCacheRepository implements ICacheRepository {
       maxRetriesPerRequest: 3,
     });
 
-    this.redis.on('error', (err) => {
-      this.logger.error(`Redis AWS Error: ${err.message}`);
-    });
-
-    this.redis.on('connect', () => {
-      this.logger.log('Conectado a Redis AWS ElastiCache');
-    });
+    if (!this.injectedRedis) {
+      this.redis.on('error', (err) => {
+        this.logger.error('Redis connection error:', err);
+      });
+    }
   }
 
   async set(item: CacheItem): Promise<void> {
@@ -224,5 +223,24 @@ export class AWSRedisCacheRepository implements ICacheRepository {
 
   async onModuleDestroy() {
     await this.redis.quit();
+  }
+
+  async getKeys(pattern: string): Promise<string[]> {
+    try {
+      return await this.redis.keys(pattern);
+    } catch (error) {
+      this.logger.error(`Error getting keys with pattern ${pattern}: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async ping(): Promise<boolean> {
+    try {
+      const result = await this.redis.ping();
+      return result === 'PONG';
+    } catch (error) {
+      this.logger.error('Error checking Redis health', error.stack);
+      return false;
+    }
   }
 } 

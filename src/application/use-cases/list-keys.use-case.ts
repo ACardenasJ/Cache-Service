@@ -4,26 +4,20 @@ import { CACHE_REPOSITORY } from '../../domain/repositories/cache-repository.tok
 import { LoggerService } from '../../infrastructure/services/logger.service';
 
 @Injectable()
-export class GetCacheUseCase {
+export class ListKeysUseCase {
   constructor(
     @Inject(CACHE_REPOSITORY)
     private readonly cacheRepository: ICacheRepository,
     private readonly logger: LoggerService,
   ) {}
 
-  async execute(key: string): Promise<any> {
+  async execute(pattern: string): Promise<string[]> {
     try {
-      const cacheItem = await this.cacheRepository.get(key);
-      
-      if (cacheItem) {
-        this.logger.log(`Cache hit for key: ${key}`);
-        return cacheItem.value;
-      } else {
-        this.logger.log(`Cache miss for key: ${key}`);
-        return null;
-      }
+      const keys = await this.cacheRepository.getKeys(pattern);
+      this.logger.log(`Listed keys with pattern: ${pattern}`);
+      return keys;
     } catch (error) {
-      this.logger.error(`Error getting cache for key: ${key}`, error.stack);
+      this.logger.error(`Error listing keys with pattern: ${pattern}`, error.stack);
       throw error;
     }
   }

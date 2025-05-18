@@ -198,4 +198,30 @@ export class MemoryCacheRepository implements ICacheRepository {
       clearInterval(this.cleanupInterval);
     }
   }
+
+  async getKeys(pattern: string): Promise<string[]> {
+    try {
+      const allKeys = Array.from(this.cache.keys());
+      if (pattern === '*') {
+        return allKeys;
+      }
+      
+      // Convert the pattern to a regular expression
+      const regexPattern = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      return allKeys.filter(key => regexPattern.test(key));
+    } catch (error) {
+      this.logger.error(`Error getting keys with pattern ${pattern}: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async ping(): Promise<boolean> {
+    try {
+      // For in-memory cache, we always return true as it's always available
+      return true;
+    } catch (error) {
+      this.logger.error('Error checking memory cache health', error.stack);
+      return false;
+    }
+  }
 } 

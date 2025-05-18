@@ -1,18 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get } from '@nestjs/common';
 import { LoggerService } from '../services/logger.service';
+import { HealthCheckUseCase, HealthStatus } from '../../application/use-cases/health-check.use-case';
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly logger: LoggerService) {}
+  constructor(
+    private readonly healthCheckUseCase: HealthCheckUseCase,
+    private readonly logger: LoggerService
+  ) {}
 
   @Get()
-  healthCheck() {
+  async healthCheck(): Promise<HealthStatus> {
     this.logger.log('Health check requested', 'HealthController');
-    return {
-      status: 'Ok',
-      timestamp: new Date().toISOString(),
-      service: 'cache-service'
-    };
+    return this.healthCheckUseCase.execute();
   }
 } 

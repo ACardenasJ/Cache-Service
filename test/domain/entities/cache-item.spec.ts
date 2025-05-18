@@ -1,4 +1,4 @@
-import { CacheItem } from './cache-item.entity';
+import { CacheItem } from '../../../src/domain/entities/cache-item.entity';
 
 describe('CacheItem', () => {
   describe('isExpired', () => {

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Git
+.git
+.gitignore
+
+# Tests
+test
+coverage
+.nyc_output
+
+# IDE
+.idea
+.vscode
+
+# Build
+dist
+
+# Environment
+.env*
+*.env
+
+# Terraform
+terraform
+.terraform
+*.tfstate
+*.tfvars
+
+# Kubernetes
+k8s
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+README.md
+CHANGELOG.md
+docker-compose*.yml 

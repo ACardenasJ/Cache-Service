@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  cache-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - AWS_ELASTICACHE_ENDPOINT=redis
+      - AWS_ELASTICACHE_PORT=6379
+      - AWS_ELASTICACHE_AUTH_TOKEN=
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - redis
+    command: npm run start:dev
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  redis_data: 

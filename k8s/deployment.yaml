@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-service
+  labels:
+    app: cache-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cache-service
+  template:
+    metadata:
+      labels:
+        app: cache-service
+    spec:
+      containers:
+      - name: cache-service
+        image: ${ECR_REGISTRY}/cache-service:${IMAGE_TAG}
+        ports:
+        - containerPort: 3002
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3002"
+        - name: AWS_ELASTICACHE_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: cache-service-secrets
+              key: elasticache-endpoint
+        - name: AWS_ELASTICACHE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: cache-service-secrets
+              key: elasticache-port
+        - name: AWS_ELASTICACHE_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cache-service-secrets
+              key: elasticache-auth-token
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 5
+          periodSeconds: 5 

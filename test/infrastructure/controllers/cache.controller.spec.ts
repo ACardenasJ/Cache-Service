@@ -8,6 +8,7 @@ import { CompareAndSetCacheUseCase } from '../../../src/application/use-cases/co
 import { LoggerService } from '../../../src/infrastructure/services/logger.service';
 import { DeleteCacheUseCase } from '../../../src/application/use-cases/delete-cache.use-case';
 import { ListKeysUseCase } from '../../../src/application/use-cases/list-keys.use-case';
+import { LocalCacheService } from '../../../src/infrastructure/services/local-cache.service';
 
 describe('CacheController', () => {
   let controller: CacheController;
@@ -17,6 +18,7 @@ describe('CacheController', () => {
   let compareAndSetCacheUseCase: CompareAndSetCacheUseCase;
   let deleteCacheUseCase: DeleteCacheUseCase;
   let listKeysUseCase: ListKeysUseCase;
+  let localCacheService: LocalCacheService;
 
   const mockSetCacheUseCase = {
     execute: jest.fn(),
@@ -39,6 +41,14 @@ describe('CacheController', () => {
     error: jest.fn(),
     warn: jest.fn(),
     debug: jest.fn(),
+  };
+
+  const mockLocalCacheService = {
+    get: jest.fn(),
+    set: jest.fn(),
+    delete: jest.fn(),
+    clear: jest.fn(),
+    getStats: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -77,6 +87,10 @@ describe('CacheController', () => {
             execute: jest.fn(),
           },
         },
+        {
+          provide: LocalCacheService,
+          useValue: mockLocalCacheService,
+        },
       ],
     }).compile();
 
@@ -87,6 +101,7 @@ describe('CacheController', () => {
     compareAndSetCacheUseCase = module.get<CompareAndSetCacheUseCase>(CompareAndSetCacheUseCase);
     deleteCacheUseCase = module.get<DeleteCacheUseCase>(DeleteCacheUseCase);
     listKeysUseCase = module.get<ListKeysUseCase>(ListKeysUseCase);
+    localCacheService = module.get<LocalCacheService>(LocalCacheService);
   });
 
   afterEach(() => {
@@ -186,12 +201,18 @@ describe('CacheController', () => {
   });
 
   describe('delete', () => {
-    it('should delete cached value', async () => {
+    it('should delete cached value and local cache', async () => {
       const key = 'test-key';
       jest.spyOn(deleteCacheUseCase, 'execute').mockResolvedValue(undefined);
 
       await controller.delete(key);
+      
       expect(deleteCacheUseCase.execute).toHaveBeenCalledWith(key);
+      expect(mockLocalCacheService.delete).toHaveBeenCalledWith(key);
+      expect(mockLoggerService.log).toHaveBeenCalledWith(
+        `Deleting cache for key: ${key}`,
+        'CacheController'
+      );
     });
   });
 
@@ -204,6 +225,54 @@ describe('CacheController', () => {
       const result = await controller.listKeys(pattern);
       expect(result).toEqual(keys);
       expect(listKeysUseCase.execute).toHaveBeenCalledWith(pattern);
+    });
+  });
+
+  describe('deleteLocalCache', () => {
+    it('should delete specific key from local cache', async () => {
+      const key = 'test-key';
+      
+      await controller.deleteLocalCache(key);
+      
+      expect(mockLocalCacheService.delete).toHaveBeenCalledWith(key);
+      expect(mockLoggerService.log).toHaveBeenCalledWith(
+        `Deleting local cache for key: ${key}`,
+        'CacheController'
+      );
+    });
+  });
+
+  describe('clearLocalCache', () => {
+    it('should clear all local cache', async () => {
+      await controller.clearLocalCache();
+      
+      expect(mockLocalCacheService.clear).toHaveBeenCalled();
+      expect(mockLoggerService.log).toHaveBeenCalledWith(
+        'Clearing all local cache',
+        'CacheController'
+      );
+    });
+  });
+
+  describe('getLocalCacheStats', () => {
+    it('should return local cache statistics', async () => {
+      const mockStats = {
+        size: 2,
+        entries: [
+          { key: 'key1', expiresIn: 30 },
+          { key: 'key2', expiresIn: 45 }
+        ]
+      };
+      mockLocalCacheService.getStats.mockReturnValue(mockStats);
+
+      const result = await controller.getLocalCacheStats();
+      
+      expect(result).toEqual(mockStats);
+      expect(mockLocalCacheService.getStats).toHaveBeenCalled();
+      expect(mockLoggerService.log).toHaveBeenCalledWith(
+        'Getting local cache statistics',
+        'CacheController'
+      );
     });
   });
 }); 

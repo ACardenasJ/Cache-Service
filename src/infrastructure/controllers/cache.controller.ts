@@ -17,6 +17,8 @@ import { CompareAndSetCacheUseCase } from '../../application/use-cases/compare-a
 import { DeleteCacheUseCase } from '../../application/use-cases/delete-cache.use-case';
 import { ListKeysUseCase } from '../../application/use-cases/list-keys.use-case';
 import { LoggerService } from '../services/logger.service';
+import { UseLocalCache } from '../decorators/local-cache.decorator';
+import { LocalCacheService } from '../services/local-cache.service';
 
 @Controller('cache')
 export class CacheController {
@@ -28,6 +30,7 @@ export class CacheController {
     private readonly deleteCacheUseCase: DeleteCacheUseCase,
     private readonly listKeysUseCase: ListKeysUseCase,
     private readonly logger: LoggerService,
+    private readonly localCacheService: LocalCacheService,
   ) {}
 
   @Post(':key')
@@ -41,6 +44,7 @@ export class CacheController {
   }
 
   @Get(':key')
+  @UseLocalCache({ ttl: 30 }) // 30 segundos de caché local
   async get(@Param('key') key: string): Promise<any> {
     this.logger.log(`Getting cache for key: ${key}`, 'CacheController');
     return this.getCacheUseCase.execute(key);
@@ -51,9 +55,12 @@ export class CacheController {
   async delete(@Param('key') key: string): Promise<void> {
     this.logger.log(`Deleting cache for key: ${key}`, 'CacheController');
     await this.deleteCacheUseCase.execute(key);
+    // También eliminar de la caché local
+    this.localCacheService.delete(key);
   }
 
   @Get()
+  @UseLocalCache({ ttl: 60 }) // 1 minuto de caché local para listados
   async listKeys(@Query('pattern') pattern: string = '*'): Promise<string[]> {
     this.logger.log(`Listing keys with pattern: ${pattern}`, 'CacheController');
     return this.listKeysUseCase.execute(pattern);
@@ -86,5 +93,27 @@ export class CacheController {
       body.expectedVersion,
     );
     return { success };
+  }
+
+  // Nuevos endpoints para gestión del caché local
+
+  @Delete('local/:key')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteLocalCache(@Param('key') key: string): Promise<void> {
+    this.logger.log(`Deleting local cache for key: ${key}`, 'CacheController');
+    this.localCacheService.delete(key);
+  }
+
+  @Delete('local')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async clearLocalCache(): Promise<void> {
+    this.logger.log('Clearing all local cache', 'CacheController');
+    this.localCacheService.clear();
+  }
+
+  @Get('local/stats')
+  async getLocalCacheStats(): Promise<any> {
+    this.logger.log('Getting local cache statistics', 'CacheController');
+    return this.localCacheService.getStats();
   }
 } 

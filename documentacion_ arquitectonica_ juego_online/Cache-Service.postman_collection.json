@@ -1,0 +1,156 @@
+{
+  "info": {
+    "name": "Cache Service",
+    "description": "API para el servicio de caché distribuido",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Caché",
+      "item": [
+        {
+          "name": "Obtener valor",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cache/:key",
+              "host": ["{{baseUrl}}"],
+              "path": ["cache", ":key"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "mi-clave",
+                  "description": "Clave del caché"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Almacenar valor",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cache",
+              "host": ["{{baseUrl}}"],
+              "path": ["cache"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"mi-clave\",\n  \"value\": \"mi-valor\",\n  \"ttl\": 3600,\n  \"quorum\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar valor",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/cache/:key",
+              "host": ["{{baseUrl}}"],
+              "path": ["cache", ":key"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "mi-clave",
+                  "description": "Clave del caché"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar claves",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cache/keys?pattern=user:*",
+              "host": ["{{baseUrl}}"],
+              "path": ["cache", "keys"],
+              "query": [
+                {
+                  "key": "pattern",
+                  "value": "user:*",
+                  "description": "Patrón de búsqueda (opcional)"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patrones",
+      "item": [
+        {
+          "name": "Eliminar por patrón",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cache/pattern",
+              "host": ["{{baseUrl}}"],
+              "path": ["cache", "pattern"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pattern\": \"user:*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Compare and Set",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cache/compare-and-set",
+              "host": ["{{baseUrl}}"],
+              "path": ["cache", "compare-and-set"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"mi-clave\",\n  \"expectedValue\": \"valor-esperado\",\n  \"newValue\": \"nuevo-valor\",\n  \"ttl\": 3600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Monitoreo",
+      "item": [
+        {
+          "name": "Verificar salud",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3002",
+      "type": "string"
+    }
+  ]
+} 

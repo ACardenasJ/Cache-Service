@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo del Sistema
 
-Diseñar, implementar y desplegar una plataforma multijugador online por turnos, capaz de manejar múltiples partidas activas con comunicación en tiempo real, almacenamiento seguro, escalabilidad automática y separación por microservicios bajo un enfoque de arquitectura hexagonal, orientada a eventos, y desplegada sobre AWS.
+Nuestro objetivo es crear una plataforma multijugador online por turnos que sea robusta, escalable y divertida. Queremos que los jugadores puedan disfrutar de partidas fluidas, con comunicación en tiempo real y sin preocuparse por la infraestructura. Para lograrlo, hemos diseñado un sistema distribuido que maneja múltiples partidas activas, con almacenamiento seguro y escalabilidad automática, todo desplegado sobre AWS.
 
 ---
 
@@ -10,25 +10,24 @@ Diseñar, implementar y desplegar una plataforma multijugador online por turnos,
 
 | Componente        | Tecnología                      | Justificación técnica                                                             |
 |------------------|----------------------------------|-----------------------------------------------------------------------------------|
-| Cliente del Juego| **Unreal Engine (C++)**          | Motor gráfico avanzado, permite exportación a WebGL, nativo y móvil              |
-| Backend API      | **NestJS (Node.js + TS)**        | Modular, compatible con WebSocket y REST, integración sencilla con AWS           |
-| Cache Distribuida| **Redis (Elasticache)**          | Almacenamiento temporal rápido y TTL, clave para partidas en tiempo real         |
-| Persistencia     | **Amazon RDS (PostgreSQL)**      | Consistencia fuerte, relaciones complejas, backups automáticos                   |
-| Mensajería       | **Amazon SQS**                   | Comunicación asíncrona entre microservicios, desacoplamiento                     |
-| Observabilidad   | **Datadog**                      | Logs estructurados, trazabilidad, dashboards personalizados                      |
-| Infraestructura  | **AWS + Terraform**              | IAC modular, despliegue reproducible en staging y producción                     |
-| CI/CD            | **GitHub Actions + Docker + ECR**| Pipeline automatizado para pruebas, build y despliegue en contenedores           |
+| Cliente del Juego| **Unreal Engine (C++)**          | Elegimos Unreal por su potencia gráfica y la capacidad de exportar a cualquier plataforma |
+| Backend API      | **NestJS (Node.js + TS)**        | NestJS nos da la modularidad que necesitamos y se integra perfectamente con AWS   |
+| Cache Distribuida| **Redis (Elasticache)**          | Redis nos permite mantener el estado de las partidas en tiempo real de forma eficiente |
+| Persistencia     | **Amazon RDS (PostgreSQL)**      | PostgreSQL nos da la confiabilidad que necesitamos para los datos importantes     |
+| Mensajería       | **Amazon SQS**                   | SQS nos ayuda a mantener los servicios desacoplados y escalables                  |
+| Observabilidad   | **Datadog**                      | Con Datadog podemos ver exactamente qué está pasando en nuestro sistema           |
+| Infraestructura  | **AWS + Terraform**              | Terraform nos permite replicar nuestra infraestructura de forma consistente       |
+| CI/CD            | **GitHub Actions + Docker + ECR**| Automatizamos todo el proceso de desarrollo y despliegue                          |
 
 ---
 
 ## 🧱 Arquitectura General
 
-La arquitectura sigue principios de **Clean Architecture** + **Hexagonal Architecture**, separando lógica de dominio de infraestructura.
+Hemos diseñado la arquitectura siguiendo los principios de Clean Architecture y Hexagonal Architecture. Esto nos permite mantener el código organizado y fácil de mantener. Los servicios se comunican entre sí de tres formas:
 
-La comunicación entre microservicios se da por:
-- **REST** para acciones síncronas
-- **WebSocket** para tiempo real
-- **SQS** para eventos asincrónicos desacoplados (ej. `TurnEnded`, `MatchAbandoned`)
+- **REST** para operaciones que necesitan respuesta inmediata
+- **WebSocket** para mantener a los jugadores conectados en tiempo real
+- **SQS** para eventos que pueden procesarse de forma asíncrona
 
 ---
 
@@ -36,10 +35,10 @@ La comunicación entre microservicios se da por:
 
 | Microservicio     | Función principal                                                                 |
 |-------------------|-----------------------------------------------------------------------------------|
-| `Auth Service`     | Registro/login de usuarios, generación y validación de JWT                       |
-| `Game Service`     | Lógica del juego por turnos, reglas, conexión WebSocket, almacenamiento en Redis |
-| `MatchHistory`     | Lectura del historial de partidas, reportes y estadísticas desde RDS             |
-| `Cache Service`    | Interfaz REST sobre Redis. Claves, TTL, jugadores activos, sincronización rápida |
+| `Auth Service`     | Se encarga de que los jugadores puedan registrarse y conectarse de forma segura   |
+| `Game Service`     | Maneja toda la lógica del juego y mantiene las partidas activas                   |
+| `MatchHistory`     | Guarda el historial de partidas y genera estadísticas interesantes                |
+| `Cache Service`    | Optimiza el rendimiento almacenando datos temporales de forma eficiente           |
 
 ---
 
@@ -47,76 +46,118 @@ La comunicación entre microservicios se da por:
 
 | Capa         | Tecnología              | Uso principal                                                         |
 |--------------|--------------------------|-----------------------------------------------------------------------|
-| Temporal     | Redis Cluster (Elasticache) | Estado de partidas activas, TTL, jugadores conectados               |
-| Persistente  | Amazon RDS (PostgreSQL)     | Usuarios, partidas finalizadas, turnos históricos                    |
-| Mensajería   | Amazon SQS                  | Eventos asincrónicos: finalización de turno, abandono, auditoría     |
-
-Redis se usa vía `Cache Service`, que abstrae el acceso mediante API REST.  
-RDS se accede desde `Game Service` y `MatchHistory` para persistencia y reporting.  
-SQS conecta `GameService`, `EventDispatcher` y `MatchHistory` de forma desacoplada.
+| Temporal     | Redis Cluster (Elasticache) | Guardamos el estado de las partidas en curso y datos que cambian frecuentemente |
+| Persistente  | Amazon RDS (PostgreSQL)     | Almacenamos información importante como perfiles y estadísticas       |
+| Mensajería   | Amazon SQS                  | Usamos SQS para comunicar eventos importantes entre servicios         |
 
 ---
 
 ## ⚙️ Mecanismos de Escalabilidad
 
-- Servicios contenedorizados sobre **AWS ECS con Fargate**
-- Redis Cluster soporta partición y replicación
-- RDS Multi-AZ con autoescalado vertical
-- Despliegue en múltiples zonas de disponibilidad
-- Terraform permite escalar infraestructura declarativamente
+Para asegurarnos de que el sistema pueda crecer con la demanda:
+
+- Usamos contenedores en AWS ECS con Fargate para escalar automáticamente
+- Redis Cluster nos permite distribuir la carga
+- RDS se ajusta automáticamente según la necesidad
+- Desplegamos en múltiples zonas para mayor disponibilidad
+- Terraform nos ayuda a gestionar todo de forma consistente
 
 ---
 
 ## 🧱 Tolerancia a Fallos
 
-- Servicios desacoplados por medio de Amazon SQS
-- Redis con réplicas y reintentos automáticos
-- RDS configurado con alta disponibilidad y backups automáticos
-- Monitoreo con Datadog para actuar ante errores o picos de latencia
-- WebSocket con reintento automático y fallback a polling si es necesario
+Nadie quiere perder una partida por un error técnico, por eso:
+
+- Los servicios están desacoplados usando SQS
+- Redis tiene réplicas para mayor seguridad
+- RDS mantiene backups automáticos
+- Monitoreamos todo con Datadog para detectar problemas antes
+- WebSocket se recupera automáticamente si hay problemas
 
 ---
 
 ## 🔐 Seguridad
 
-- Autenticación JWT (Bcrypt para contraseñas)
-- Middleware en Gateway y WS para validación de tokens
-- Control de acceso por roles (RBAC)
-- CORS habilitado y rate-limiting en API Gateway
-- Logs auditables en Datadog
-- HTTPS obligatorio en frontend y backend
+La seguridad es una prioridad:
+
+- Usamos JWT para autenticación segura
+- Validamos tokens en cada petición
+- Controlamos el acceso por roles
+- Limitamos las peticiones para prevenir abusos
+- Todo se comunica por HTTPS
+- Mantenemos logs detallados de todo
 
 ---
 
 ## 🔄 Flujo del Juego
 
-1. El jugador inicia sesión → recibe JWT
-2. Se conecta a WebSocket para unirse a una partida
-3. `Game Service` valida el turno → procesa acción
-4. Guarda estado temporal en Redis
-5. Publica evento `TurnEnded` en SQS
-6. Al finalizar, guarda en RDS
-7. `MatchHistory` consume SQS y actualiza estadísticas
+Así es como funciona una partida:
+
+1. El jugador inicia sesión y recibe su token
+2. Se conecta a la partida vía WebSocket
+3. El servidor valida y procesa cada acción
+4. Guardamos el estado en Redis para acceso rápido
+5. Notificamos a otros servicios vía SQS
+6. Al terminar, guardamos todo en la base de datos
+7. Actualizamos las estadísticas del jugador
 
 ---
 
 ## 🧠 Observabilidad y CI/CD
 
-- Todos los servicios emiten logs estructurados a **Datadog**
-- Monitoreo de partidas activas, errores, latencia por servicio
-- Dashboards y alertas configurables
-- GitHub Actions ejecuta pruebas, build y despliegue continuo
-- Terraform gestiona el ciclo de vida completo de la infraestructura
+Para mantener todo funcionando bien:
+
+- Todos los servicios envían logs a Datadog
+- Monitoreamos partidas activas y rendimiento
+- Tenemos dashboards personalizados
+- Automatizamos pruebas y despliegues
+- Gestionamos la infraestructura con Terraform
 
 ---
 
 ## 📐 Diagrama Arquitectónico
 
-El diseño detallado se encuentra en `CIII JIKKO.drawio`, incluyendo:
+Puedes ver el diseño completo en `CIII JIKKO.drawio`, que incluye:
 
-- Cliente Unreal
-- API Gateway
-- Microservicios REST y WS
-- Redis y RDS
-- SQS como middleware de eventos
-- Observabilidad centralizada
+- Cómo se conecta el cliente
+- Cómo fluyen los datos
+- Dónde se almacena cada cosa
+- Cómo se comunican los servicios
+- Cómo monitoreamos todo
+
+---
+
+## 👨‍💻 Autor
+- **Nombre**: Andrés Eduardo Cárdenas Jaramillo
+- **GitHub**: https://github.com/ACardenasJ/Cache-Service.git
+- **Rol**: Arquitecto de Software
+- **Especialidad**: Desarrollo Back-end y Sistemas Distribuidos
+
+## 📅 Versión
+- **Fecha**: Mayo 2024
+- **Versión**: 1.0.0
+- **Estado**: En desarrollo activo
+
+## 🙏 Agradecimientos
+- NestJS Team por el increíble framework
+- Redis por la excelente base de datos
+- AWS por la infraestructura robusta
+- Todos los contribuidores que han ayudado a mejorar el proyecto
+
+## 📞 Soporte
+Si encuentras algún problema o tienes sugerencias, por favor:
+- Abre un issue en GitHub
+- Contacta al autor directamente
+- Únete a nuestro canal de Discord
+
+## 🔄 Roadmap
+- [ ] Implementación de caché multi-nivel
+- [ ] Soporte para más backends de caché
+- [ ] Dashboard de monitoreo
+- [ ] Integración con más sistemas de métricas
+- [ ] Mejoras en la documentación
+- [ ] Más ejemplos de uso
+
+---
+
+⭐️ Si te gusta el proyecto, no olvides darle una estrella en GitHub!

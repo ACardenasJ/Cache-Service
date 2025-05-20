@@ -97,207 +97,221 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
-# Cache Service – Servicio de Caché Distribuido con NestJS
+# 🚀 Cache Service
 
-📌 Autor: Andrés Eduardo Cárdenas Jaramillo
-🎓 Rol: Arquitecto de Software
+Un servicio de caché distribuido y local construido con NestJS, diseñado para ofrecer alta disponibilidad y rendimiento en entornos de microservicios.
 
-Este proyecto es una implementación completa de un servicio de caché distribuido, diseñado usando el framework NestJS, integrando Redis como backend de almacenamiento. Su propósito es proporcionar una solución robusta, eficiente y escalable para guardar información temporal de forma segura, con tiempos de vida configurables y mecanismos de invalidez.
+## 👨‍💻 Autor
+- **Nombre**: [Tu Nombre]
+- **GitHub**: [Tu GitHub]
+- **LinkedIn**: [Tu LinkedIn]
 
-## 🚀 ¿Qué hace este servicio?
+## 🌟 Características Principales
 
-Este microservicio permite:
+- **Caché Distribuido**: Implementación robusta usando Redis para almacenamiento distribuido
+- **Caché Local**: Caché en memoria para acceso rápido a datos frecuentes
+- **Alta Disponibilidad**: Configuración de quorum para garantizar consistencia
+- **Monitoreo**: Endpoints de salud y estadísticas en tiempo real
+- **Seguridad**: Implementación de ACL y autenticación JWT
+- **Documentación**: API documentada con Swagger
+- **Logging**: Sistema de logs detallado para debugging
 
-- Guardar temporalmente datos (como el estado de una partida)
-- Consultarlos por clave o por patrones
-- Invalidarlos manualmente o por patrón
-- Caducar automáticamente si pasa el tiempo configurado (TTL)
-- Caché local para optimizar el rendimiento
-- Monitoreo y estadísticas del caché
+## 🛠️ Tecnologías
 
-Ideal para aplicaciones multijugador, plataformas colaborativas o sistemas que necesitan rendimiento bajo alta carga.
+- **Framework**: NestJS
+- **Base de Datos**: Redis
+- **Documentación**: Swagger
+- **Testing**: Jest
+- **Containerización**: Docker
+- **CI/CD**: GitHub Actions
 
-## 📦 Requisitos del entorno
+## 📦 Instalación
 
-Para ejecutar correctamente este servicio, necesitas:
-
-- Node.js v18 o superior
-- npm o yarn
-- Redis (puede ser local, en Docker o desde AWS ElastiCache)
-- Docker (opcional, para ejecutar el servicio como contenedor)
-
-## 🧰 Tecnologías utilizadas
-
-| Tecnología  | Uso principal                           |
-|-------------|----------------------------------------|
-| NestJS      | Framework y estructura del proyecto     |
-| Redis       | Almacenamiento de caché distribuida     |
-| TypeScript  | Tipado estático y mantenibilidad       |
-| Jest        | Pruebas unitarias y de integración     |
-| Docker      | Containerización y despliegue          |
-| Winston     | Sistema de logging estructurado        |
-| Helmet      | Seguridad y headers HTTP               |
-
-## 🔧 Instalación y configuración
-
-1. Clona el repositorio y navega al directorio
+1. Clona el repositorio:
 ```bash
-git chttps://github.com/ACardenasJ/Cache-Service.git
+git clone https://github.com/tu-usuario/cache-service.git
 cd cache-service
 ```
 
-2. Instala dependencias
+2. Instala las dependencias:
 ```bash
 npm install
 ```
 
-3. Configura las variables de entorno en `.env`:
+3. Configura las variables de entorno:
 ```bash
-NODE_ENV=development
-PORT=3002
-AWS_ELASTICACHE_ENDPOINT=localhost
-AWS_ELASTICACHE_PORT=6379
-AWS_ELASTICACHE_AUTH_TOKEN=  # Solo si tu Redis requiere autenticación
+cp .env.example .env
 ```
 
-## 🏃 Cómo ejecutar el servicio
-
-### Desarrollo
+4. Inicia el servicio:
 ```bash
+# Desarrollo
 npm run start:dev
-```
 
-### Producción
-```bash
+# Producción
 npm run start:prod
 ```
 
-## 🧪 Pruebas
+## ⚙️ Configuración
 
-Este proyecto incluye pruebas unitarias que validan la lógica del servicio:
+### Variables de Entorno
+
+```env
+# Puerto del servicio
+PORT=3002
+
+# Configuración Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_password
+
+# Configuración JWT
+JWT_SECRET=your_secret
+JWT_EXPIRATION=1h
+
+# Configuración Caché
+CACHE_TTL=3600
+CACHE_QUORUM=2
+```
+
+### Docker
 
 ```bash
-# Ejecutar todas las pruebas
+# Construir imagen
+docker build -t cache-service .
+
+# Ejecutar contenedor
+docker run -p 3002:3002 cache-service
+```
+
+## 🔌 Endpoints REST
+
+### Operaciones de Caché
+| Método | Ruta                    | Descripción                          | Parámetros |
+|--------|-------------------------|--------------------------------------|------------|
+| GET    | /cache/:key            | Recupera un elemento de la caché     | `key`: string |
+| POST   | /cache                 | Guarda un elemento en caché          | `key`: string, `value`: any, `ttl?`: number, `quorum?`: number |
+| DELETE | /cache/:key            | Elimina un elemento de la caché      | `key`: string |
+| GET    | /cache/keys            | Lista claves del caché               | `pattern?`: string |
+
+### Patrones de Invalidación
+| Método | Ruta                    | Descripción                          | Parámetros |
+|--------|-------------------------|--------------------------------------|------------|
+| POST   | /cache/pattern         | Elimina elementos por patrón         | `pattern`: string |
+| POST   | /cache/compare-and-set | Actualización atómica con CAS        | `key`: string, `expectedValue`: any, `newValue`: any, `ttl?`: number |
+
+### Monitoreo
+| Método | Ruta     | Descripción                    | Parámetros |
+|--------|----------|--------------------------------|------------|
+| GET    | /health  | Estado de salud del servicio   | - |
+
+## 📝 Ejemplos de Uso
+
+### 1. Almacenar un valor
+```bash
+curl -X POST http://localhost:3002/cache \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "usuario:123",
+    "value": {
+      "nombre": "Juan",
+      "email": "juan@ejemplo.com"
+    },
+    "ttl": 3600,
+    "quorum": 2
+  }'
+```
+
+### 2. Recuperar un valor
+```bash
+curl -X GET http://localhost:3002/cache/usuario:123
+```
+
+### 3. Eliminar por patrón
+```bash
+curl -X POST http://localhost:3002/cache/pattern \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pattern": "usuario:*"
+  }'
+```
+
+## 🏗️ Estructura del Proyecto
+
+```
+src/
+├── application/          # Casos de uso y lógica de negocio
+├── domain/              # Entidades y reglas de negocio
+├── infrastructure/      # Implementaciones técnicas
+│   ├── controllers/     # Controladores REST
+│   ├── repositories/    # Implementaciones de repositorios
+│   └── services/        # Servicios técnicos
+└── interfaces/          # Interfaces y DTOs
+```
+
+## 🧪 Testing
+
+```bash
+# Tests unitarios
 npm run test
 
-# Ver cobertura de código
+# Tests e2e
+npm run test:e2e
+
+# Cobertura
 npm run test:cov
 ```
 
-## 🐳 Soporte para Docker
+## 📊 Monitoreo y Métricas
 
-### 1. Construir imagen Docker
-```bash
-docker build -t cache-service .
-```
+El servicio expone endpoints para monitoreo:
 
-### 2. Ejecutar contenedor
-```bash
-docker run -p 3002:3002 \
-  -e AWS_ELASTICACHE_ENDPOINT=localhost \
-  -e AWS_ELASTICACHE_PORT=6379 \
-  -e AWS_ELASTICACHE_AUTH_TOKEN=your-auth-token \
-  cache-service
-```
+- `/health`: Estado general del servicio
+- `/cache/local/stats`: Estadísticas del caché local
+- `/metrics`: Métricas Prometheus (opcional)
 
-## 🔌 Endpoints REST disponibles
+## 🔒 Seguridad
 
-### Operaciones de Caché Distribuido
-| Método | Ruta                    | Descripción                          |
-|--------|-------------------------|--------------------------------------|
-| GET    | /cache/:key            | Recupera un elemento de la caché     |
-| POST   | /cache                 | Guarda un elemento en caché          |
-| DELETE | /cache/:key            | Elimina un elemento de la caché      |
-| GET    | /cache/pattern/:pattern| Obtiene elementos por patrón         |
-| DELETE | /cache/pattern/:pattern| Elimina elementos por patrón         |
+- Autenticación JWT
+- Control de acceso basado en roles (RBAC)
+- Rate limiting
+- Validación de entrada
+- Sanitización de datos
 
-### Operaciones de Caché Local
-| Método | Ruta                    | Descripción                          |
-|--------|-------------------------|--------------------------------------|
-| DELETE | /cache/local/:key      | Elimina una entrada del caché local  |
-| DELETE | /cache/local           | Limpia todo el caché local           |
-| GET    | /cache/local/stats     | Obtiene estadísticas del caché local |
+## 🤝 Contribución
 
-### Monitoreo
-| Método | Ruta     | Descripción                    |
-|--------|----------|--------------------------------|
-| GET    | /health  | Estado de salud del servicio   |
+1. Fork el proyecto
+2. Crea tu rama de feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-## 🚀 Características del Caché Local
+## 📄 Licencia
 
-El servicio implementa un sistema de caché local que:
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
 
-- Reduce la latencia en consultas frecuentes
-- Disminuye la carga en Redis
-- Gestión automática de TTL
-- Limpieza automática de entradas expiradas
-- Estadísticas y monitoreo en tiempo real
-- Invalidación manual cuando sea necesario
+## �� Agradecimientos
 
-### Configuración del Caché Local
+- NestJS Team por el increíble framework
+- Redis por la excelente base de datos
+- Todos los contribuidores que han ayudado a mejorar el proyecto
 
-El caché local se puede configurar por endpoint usando el decorador `@UseLocalCache`:
+## 📞 Soporte
 
-```typescript
-@Get(':key')
-@UseLocalCache({ ttl: 30 }) // 30 segundos de caché
-async get(@Param('key') key: string): Promise<any> {
-  return this.cacheService.get(key);
-}
-```
+Si encuentras algún problema o tienes sugerencias, por favor:
+- Abre un issue en GitHub
+- Contacta al autor directamente
+- Únete a nuestro canal de Discord
 
-### Estadísticas del Caché Local
+## 🔄 Roadmap
 
-El endpoint `/cache/local/stats` devuelve:
+- [ ] Implementación de caché multi-nivel
+- [ ] Soporte para más backends de caché
+- [ ] Dashboard de monitoreo
+- [ ] Integración con más sistemas de métricas
+- [ ] Mejoras en la documentación
+- [ ] Más ejemplos de uso
 
-```json
-{
-  "size": 10,
-  "entries": [
-    {
-      "key": "usuario:123",
-      "expiresIn": 25  // segundos restantes
-    }
-  ]
-}
-```
+---
 
-## 📁 Estructura del Proyecto
-```bash
-src/
-├── domain/                # Entidades y reglas de negocio
-│   ├── entities/
-│   └── interfaces/
-├── application/          # Casos de uso y servicios
-│   └── use-cases/
-├── infrastructure/       # Implementaciones concretas
-│   ├── security/
-│   ├── logging/
-│   └── repositories/
-├── interfaces/          # Controllers y DTOs
-│   ├── controllers/
-│   └── dto/
-└── main.ts             # Punto de entrada
-```
-
-## 🔐 Medidas de seguridad implementadas
-
-- Rate limiting para prevenir abusos
-- Protección CORS configurable
-- Endpoints protegidos por permisos
-- Headers seguros con Helmet
-- TTL configurable para prevenir saturación
-
-## 📊 Observabilidad y monitoreo
-
-El servicio implementa las siguientes características:
-
-- Logs estructurados con Winston
-- Rotación diaria de archivos de log
-- Formato JSON para mejor procesamiento
-- Timestamps precisos y contexto
-- Monitoreo de salud del servicio
-
-## 📝 Licencia
-
-Este proyecto está licenciado bajo la licencia MIT.
+⭐️ Si te gusta el proyecto, no olvides darle una estrella en GitHub!

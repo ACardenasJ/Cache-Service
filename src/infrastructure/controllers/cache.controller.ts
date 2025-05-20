@@ -9,13 +9,14 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  Put,
 } from '@nestjs/common';
 import { SetCacheUseCase } from '../../application/use-cases/set-cache.use-case';
 import { GetCacheUseCase } from '../../application/use-cases/get-cache.use-case';
-import { SetDistributedCacheUseCase } from '../../application/use-cases/set-distributed-cache.use-case';
 import { CompareAndSetCacheUseCase } from '../../application/use-cases/compare-and-set-cache.use-case';
 import { DeleteCacheUseCase } from '../../application/use-cases/delete-cache.use-case';
 import { ListKeysUseCase } from '../../application/use-cases/list-keys.use-case';
+import { DeletePatternUseCase } from '../../application/use-cases/delete-pattern.use-case';
 import { LoggerService } from '../services/logger.service';
 import { UseLocalCache } from '../decorators/local-cache.decorator';
 import { LocalCacheService } from '../services/local-cache.service';
@@ -25,22 +26,23 @@ export class CacheController {
   constructor(
     private readonly setCacheUseCase: SetCacheUseCase,
     private readonly getCacheUseCase: GetCacheUseCase,
-    private readonly setDistributedCacheUseCase: SetDistributedCacheUseCase,
     private readonly compareAndSetCacheUseCase: CompareAndSetCacheUseCase,
     private readonly deleteCacheUseCase: DeleteCacheUseCase,
     private readonly listKeysUseCase: ListKeysUseCase,
+    private readonly deletePatternUseCase: DeletePatternUseCase,
     private readonly logger: LoggerService,
     private readonly localCacheService: LocalCacheService,
   ) {}
 
-  @Post(':key')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post()
   async set(
-    @Param('key') key: string,
-    @Body() body: { value: any; ttl?: number },
+    @Body('key') key: string,
+    @Body('value') value: any,
+    @Body('ttl') ttl?: number,
+    @Body('quorum') quorum?: number,
   ): Promise<void> {
     this.logger.log(`Setting cache for key: ${key}`, 'CacheController');
-    await this.setCacheUseCase.execute(key, body.value, body.ttl);
+    await this.setCacheUseCase.execute(key, value, ttl, quorum);
   }
 
   @Get(':key')
@@ -59,44 +61,30 @@ export class CacheController {
     this.localCacheService.delete(key);
   }
 
-  @Get()
-  @UseLocalCache({ ttl: 60 }) // 1 minuto de caché local para listados
-  async listKeys(@Query('pattern') pattern: string = '*'): Promise<string[]> {
+  @Get('pattern/:pattern')
+  async listKeys(@Param('pattern') pattern: string): Promise<string[]> {
     this.logger.log(`Listing keys with pattern: ${pattern}`, 'CacheController');
     return this.listKeysUseCase.execute(pattern);
   }
 
-  @Post(':key/distributed')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async setDistributedCache(
-    @Param('key') key: string,
-    @Body() body: { value: any; ttl?: number; quorum?: number },
-  ): Promise<void> {
-    this.logger.log(`Setting distributed cache for key: ${key}`, 'CacheController');
-    await this.setDistributedCacheUseCase.execute(
-      key,
-      body.value,
-      body.ttl,
-      body.quorum,
-    );
+  @Delete('pattern/:pattern')
+  async deletePattern(@Param('pattern') pattern: string): Promise<void> {
+    this.logger.log(`Deleting pattern: ${pattern}`, 'CacheController');
+    await this.deletePatternUseCase.execute(pattern);
   }
 
-  @Post(':key/compare-and-set')
-  async compareAndSetCache(
+  @Put('compare-and-set/:key')
+  async compareAndSet(
     @Param('key') key: string,
-    @Body() body: { value: any; expectedVersion: number },
-  ): Promise<{ success: boolean }> {
+    @Body('expectedValue') expectedValue: any,
+    @Body('newValue') newValue: any,
+    @Body('ttl') ttl?: number,
+  ): Promise<boolean> {
     this.logger.log(`Attempting compare-and-set for key: ${key}`, 'CacheController');
-    const success = await this.compareAndSetCacheUseCase.execute(
-      key,
-      body.value,
-      body.expectedVersion,
-    );
-    return { success };
+    return this.compareAndSetCacheUseCase.execute(key, expectedValue, newValue, ttl);
   }
 
-  // Nuevos endpoints para gestión del caché local
-
+  // Endpoints para gestión del caché local
   @Delete('local/:key')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteLocalCache(@Param('key') key: string): Promise<void> {

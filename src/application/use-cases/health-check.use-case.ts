@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, Inject } from '@nestjs/common';
-import { CacheRepository } from '../../domain/repositories/cache.repository.interface';
-import { LoggerService } from '../../infrastructure/services/logger.service';
+import { ICacheRepository } from '../../domain/repositories/cache-repository.interface';
 import { CACHE_REPOSITORY } from '../../domain/repositories/cache-repository.token';
+import { LoggerService } from '../../infrastructure/services/logger.service';
 
 export interface HealthStatus {
   status: 'ok' | 'error';
@@ -15,7 +15,7 @@ export interface HealthStatus {
 export class HealthCheckUseCase {
   constructor(
     @Inject(CACHE_REPOSITORY)
-    private readonly cacheRepository: CacheRepository,
+    private readonly cacheRepository: ICacheRepository,
     private readonly logger: LoggerService,
   ) {}
 

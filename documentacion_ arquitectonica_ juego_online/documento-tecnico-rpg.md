@@ -56,13 +56,13 @@ He diseñado la arquitectura siguiendo los principios de Clean Architecture y He
 
 ## ⚙️ Mecanismos de Escalabilidad
 
-Para asegurarnos de que el sistema pueda crecer con la demanda:
+Para garantizar que el sistema pueda crecer de forma sostenible y responder eficientemente ante aumentos de carga, hemos implementado un enfoque escalable y modular:
 
-- Usamos contenedores en AWS ECS con Fargate para escalar automáticamente.
-- Redis Cluster nos permite distribuir la carga.
-- RDS se ajusta automáticamente según la necesidad.
-- Desplegamos en múltiples zonas para mayor disponibilidad.
-- Terraform nos ayuda a gestionar todo de forma consistente.
+- Utilizaremos contenedores Docker desplegados en AWS ECS con Fargate, lo que permite escalar horizontalmente sin preocuparnos por la administración de servidores.
+- El almacenamiento en caché se gestiona mediante Redis en configuración de clúster, permitiendo distribución de la carga y alta disponibilidad.
+- La base de datos relacional en AWS RDS se configura con escalamiento automático de capacidad según demanda.
+- Los servicios están desplegados en múltiples zonas de disponibilidad (AZs), lo que incrementa la tolerancia a interrupciones regionales.
+- La infraestructura está definida como código a través de Terraform, lo que asegura consistencia, reproducibilidad y facilidad para escalar entornos..
 
 ---
 
@@ -70,24 +70,23 @@ Para asegurarnos de que el sistema pueda crecer con la demanda:
 
 Nadie quiere perder una partida por un error técnico, por eso:
 
-- Los servicios están desacoplados usando SQS
-- Redis tiene réplicas para mayor seguridad
-- RDS mantiene backups automáticos
-- Monitoreamos todo con Datadog para detectar problemas antes
-- WebSocket se recupera automáticamente si hay problemas
+- Los servicios están desacoplados mediante AWS SQS, lo que permite reintentos y procesamiento asincrónico sin pérdida de mensajes.S
+- Redis cuenta con réplicas configuradas automáticamente, asegurando la persistencia del caché distribuido en caso de fallo del nodo principal.
+- RDS está respaldado con copias automáticas y restauración en caso de desastre, minimizando el riesgo de pérdida de datos.
+- El sistema es monitorizado en tiempo real mediante Datadog, lo que permite detectar anomalías o caídas antes de que impacten al usuario final.
+- Las conexiones WebSocket se gestionan con mecanismos de recuperación automática ante desconexiones o interrupciones transitorias.
 
 ---
 
 ## 🔐 Seguridad
 
-La seguridad es una prioridad:
+La seguridad está integrada en todas las capas del sistema, desde el acceso hasta la transmisión de datos::
 
-- Usamos JWT para autenticación segura
-- Validamos tokens en cada petición
-- Controlamos el acceso por roles
-- Limitamos las peticiones para prevenir abusos
-- Todo se comunica por HTTPS
-- Mantenemos logs detallados de todo
+- La autenticación se realiza con JSON Web Tokens (JWT), firmados y validados en cada petición entrante.
+- Se implementa un control de acceso basado en roles (RBAC), que asegura que cada usuario acceda solo a los recursos permitidos.
+- Se aplica rate limiting para prevenir abusos o ataques de denegación de servicio.
+- Todas las comunicaciones se realizan bajo HTTPS (TLS), asegurando la integridad y confidencialidad de los datos.
+- Se mantienen logs detallados y estructurados de todas las operaciones críticas, lo que facilita auditorías y detección de comportamientos anómalos.
 
 ---
 

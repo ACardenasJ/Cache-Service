@@ -2,7 +2,9 @@
 
 ## 🎯 Objetivo del Sistema
 
-Nuestro objetivo es crear una plataforma multijugador online por turnos que sea robusta, escalable y divertida. Queremos que los jugadores puedan disfrutar de partidas fluidas, con comunicación en tiempo real y sin preocuparse por la infraestructura. Para lograrlo, hemos diseñado un sistema distribuido que maneja múltiples partidas activas, con almacenamiento seguro y escalabilidad automática, todo desplegado sobre AWS.
+Mi objetivo es crear una plataforma multijugador online por turnos que sea robusta y escalable. Quiero que los jugadores puedan disfrutar de partidas fluidas, con comunicación en tiempo real y sin preocuparse por la infraestructura. Para lograrlo, he diseñado un sistema distribuido que maneja múltiples partidas activas, con almacenamiento seguro y escalabilidad automática y sobre todo usando la nube como herramienta principal de gestion de infraestrcurua.
+
+Para lo anterior he decido usar AWS como plataforma cloud ya que es en la que mas experiencia he tenido los ultimos 4 años laboroales.
 
 ---
 
@@ -10,24 +12,24 @@ Nuestro objetivo es crear una plataforma multijugador online por turnos que sea 
 
 | Componente        | Tecnología                      | Justificación técnica                                                             |
 |------------------|----------------------------------|-----------------------------------------------------------------------------------|
-| Cliente del Juego| **Unreal Engine (C++)**          | Elegimos Unreal por su potencia gráfica y la capacidad de exportar a cualquier plataforma |
-| Backend API      | **NestJS (Node.js + TS)**        | NestJS nos da la modularidad que necesitamos y se integra perfectamente con AWS   |
-| Cache Distribuida| **Redis (Elasticache)**          | Redis nos permite mantener el estado de las partidas en tiempo real de forma eficiente |
-| Persistencia     | **Amazon RDS (PostgreSQL)**      | PostgreSQL nos da la confiabilidad que necesitamos para los datos importantes     |
-| Mensajería       | **Amazon SQS**                   | SQS nos ayuda a mantener los servicios desacoplados y escalables                  |
-| Observabilidad   | **Datadog**                      | Con Datadog podemos ver exactamente qué está pasando en nuestro sistema           |
-| Infraestructura  | **AWS + Terraform**              | Terraform nos permite replicar nuestra infraestructura de forma consistente       |
-| CI/CD            | **GitHub Actions + Docker + ECR**| Automatizamos todo el proceso de desarrollo y despliegue                          |
+| Cliente del Juego| **Unreal Engine (C++)**          | Unreal por su potencia gráfica y la capacidad de exportar a cualquier plataforma y sobre todo por que en algun momento me gustaria aprenderla. |
+| Backend API      | **NestJS (Node.js + TS)**        | NestJS esta diseñado para desarrollos distribuidos ademas nos da la modularidad que se necesita y se integra perfectamente con AWS.   |
+| Cache Distribuida| **Redis (Elasticache)**          | Redis permite mantener el estado de las partidas en tiempo real de forma eficiente, sin ir a una base de datos directamante l oque ayuda a la latencia. |
+| Persistencia     | **Amazon RDS (PostgreSQL)**      | PostgreSQL nos da la confiabilidad que se neceita para los datos importantes, los cuales no tiene que ser buscadops varias veces en uan partida.     |
+| Mensajería       | **Amazon SQS**                   | SQS como plataforma de colas y eventos se usara con el fin de  mantener los servicios desacoplados y escalables.                  |
+| Observabilidad   | **Datadog**                      | Con Datadog Se puede ver exactamente qué está pasando en nuestro sistema, a treves de la observacion de los flujos y los endpoints que se quiera segun la complejidad.            |
+| Infraestructura  | **AWS + Terraform**              | Terraform permite crear y ademas replicar la infraestructura de forma consistente ya sea tanto en nube como en tirra y ademas con sutiles cambios podemos cambiar de nube de AWS a GCP sin mayores traumatimos.       |
+| CI/CD            | **GitHub Actions + Docker + ECR**| Esto con el fin de automatizar todo el proceso de desarrollo y despliegue, lo que conocmos como CI/CD para asi dedicarse a otros factores mas importnes como la observalidad y el monitoreo.                         |
 
 ---
 
 ## 🧱 Arquitectura General
 
-Hemos diseñado la arquitectura siguiendo los principios de Clean Architecture y Hexagonal Architecture. Esto nos permite mantener el código organizado y fácil de mantener. Los servicios se comunican entre sí de tres formas:
+He diseñado la arquitectura siguiendo los principios de Clean Architecture y Hexagonal Architecture. Esto con el fin de tener el código organizado, mantenible, escalable y usnado principios SOLID como caracterisitica principal de todo desarrollo. Desde mi p[unto de vista y el diseño aqui mencionado los servicios se comunican entre sí de tres formas:
 
-- **REST** para operaciones que necesitan respuesta inmediata
-- **WebSocket** para mantener a los jugadores conectados en tiempo real
-- **SQS** para eventos que pueden procesarse de forma asíncrona
+- **REST** para operaciones que necesitan respuesta inmediata.
+- **WebSocket** para mantener a los jugadores conectados en tiempo real.
+- **SQS** para eventos que pueden procesarse de forma asíncrona.
 
 ---
 
@@ -35,10 +37,10 @@ Hemos diseñado la arquitectura siguiendo los principios de Clean Architecture y
 
 | Microservicio     | Función principal                                                                 |
 |-------------------|-----------------------------------------------------------------------------------|
-| `Auth Service`     | Se encarga de que los jugadores puedan registrarse y conectarse de forma segura   |
-| `Game Service`     | Maneja toda la lógica del juego y mantiene las partidas activas                   |
-| `MatchHistory`     | Guarda el historial de partidas y genera estadísticas interesantes                |
-| `Cache Service`    | Optimiza el rendimiento almacenando datos temporales de forma eficiente           |
+| `Auth Service`     | Se encarga de que los jugadores puedan registrarse y conectarse de forma segura.   |
+| `Game Service`     | Maneja toda la lógica del juego y mantiene las partidas activas.                   |
+| `MatchHistory`     | Guarda el historial de partidas y genera estadísticas interesantes.                |
+| `Cache Service`    | Optimiza el rendimiento almacenando datos temporales de forma eficiente.          |
 
 ---
 
@@ -56,11 +58,11 @@ Hemos diseñado la arquitectura siguiendo los principios de Clean Architecture y
 
 Para asegurarnos de que el sistema pueda crecer con la demanda:
 
-- Usamos contenedores en AWS ECS con Fargate para escalar automáticamente
-- Redis Cluster nos permite distribuir la carga
-- RDS se ajusta automáticamente según la necesidad
-- Desplegamos en múltiples zonas para mayor disponibilidad
-- Terraform nos ayuda a gestionar todo de forma consistente
+- Usamos contenedores en AWS ECS con Fargate para escalar automáticamente.
+- Redis Cluster nos permite distribuir la carga.
+- RDS se ajusta automáticamente según la necesidad.
+- Desplegamos en múltiples zonas para mayor disponibilidad.
+- Terraform nos ayuda a gestionar todo de forma consistente.
 
 ---
 
@@ -138,11 +140,6 @@ Puedes ver el diseño completo en `CIII JIKKO.drawio`, que incluye:
 - **Versión**: 1.0.0
 - **Estado**: En desarrollo activo
 
-## 🙏 Agradecimientos
-- NestJS Team por el increíble framework
-- Redis por la excelente base de datos
-- AWS por la infraestructura robusta
-- Todos los contribuidores que han ayudado a mejorar el proyecto
 
 ## 📞 Soporte
 Si encuentras algún problema o tienes sugerencias, por favor:

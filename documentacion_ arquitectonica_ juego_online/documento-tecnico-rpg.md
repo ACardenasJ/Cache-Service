@@ -140,21 +140,6 @@ Puedes ver el diseño completo en `CIII JIKKO.drawio`, que incluye:
 - **Versión**: 1.0.0
 - **Estado**: En desarrollo activo
 
-
-## 📞 Soporte
-Si encuentras algún problema o tienes sugerencias, por favor:
-- Abre un issue en GitHub
-- Contacta al autor directamente
-- Únete a nuestro canal de Discord
-
-## 🔄 Roadmap
-- [ ] Implementación de caché multi-nivel
-- [ ] Soporte para más backends de caché
-- [ ] Dashboard de monitoreo
-- [ ] Integración con más sistemas de métricas
-- [ ] Mejoras en la documentación
-- [ ] Más ejemplos de uso
-
 ---
 
 ⭐️ Si te gusta el proyecto, no olvides darle una estrella en GitHub!

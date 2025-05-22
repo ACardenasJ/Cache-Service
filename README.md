@@ -289,19 +289,6 @@ El servicio expone endpoints para monitoreo:
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
 
-## �� Agradecimientos
-
-- NestJS Team por el increíble framework
-- Redis por la excelente base de datos
-- Todos los contribuidores que han ayudado a mejorar el proyecto
-
-## 📞 Soporte
-
-Si encuentras algún problema o tienes sugerencias, por favor:
-- Abre un issue en GitHub
-- Contacta al autor directamente
-- Únete a nuestro canal de Discord
-
 ## 🔄 Roadmap
 
 - [ ] Implementación de caché multi-nivel

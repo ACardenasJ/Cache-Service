@@ -102,9 +102,8 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 Un servicio de caché distribuido y local construido con NestJS, diseñado para ofrecer alta disponibilidad y rendimiento en entornos de microservicios.
 
 ## 👨‍💻 Autor
-- **Nombre**: [Tu Nombre]
-- **GitHub**: [Tu GitHub]
-- **LinkedIn**: [Tu LinkedIn]
+- **Nombre**: Andrés Eduardo Cárdenas Jaramillo
+- **GitHub**: ACardenasJ
 
 ## 🌟 Características Principales
 
